@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Product } from '@/lib/types';
 import { useAdmin } from '@/context/AdminContext';
-import { X, Plus, Trash2, Image as ImageIcon, Sparkles, Check, Bot } from 'lucide-react';
+import { X, Plus, Trash2, Check, Bot } from 'lucide-react';
+import ImageUpload from './ImageUpload';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -336,47 +337,18 @@ export default function ProductModal({
             </div>
           </div>
 
-          {/* Image Selection */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-2">
-              Primary Product Image Path
-            </label>
-            <div className="flex gap-3 items-center">
-              <input
-                type="text"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono"
-              />
-              <img
-                src={formData.image}
-                alt="Preview"
-                className="w-11 h-11 object-cover rounded-xl border border-slate-700 bg-slate-900 shrink-0"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
-            </div>
-
-            {/* Quick preset thumbnail pills */}
-            <div className="mt-2.5 flex flex-wrap gap-2">
-              <span className="text-[11px] text-slate-500 self-center">Presets:</span>
-              {presetImages.map((preset) => (
-                <button
-                  key={preset.path}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, image: preset.path })}
-                  className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                    formData.image === preset.path
-                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 font-bold'
-                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Media Assets & Multi-Image Upload */}
+          <ImageUpload
+            label="Product Media Assets"
+            helperText="Upload multiple robot photos from your device, choose from presets, or enter URLs. Click the star on any photo to set it as the primary cover."
+            value={formData.image}
+            onChange={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+            additionalImages={formData.additionalImages || []}
+            onAdditionalImagesChange={(urls) =>
+              setFormData((prev) => ({ ...prev, additionalImages: urls }))
+            }
+            presetImages={presetImages}
+          />
 
           {/* Description */}
           <div>
