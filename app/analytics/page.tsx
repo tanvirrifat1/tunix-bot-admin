@@ -126,7 +126,7 @@ export default function AnalyticsPage() {
                           />
                         </div>
                         <span className="text-[11px] font-mono text-slate-400 font-semibold">
-                          +{Math.floor(10 + Math.random() * 25)}%
+                          +{12 + ((idx * 5) % 18)}%
                         </span>
                       </div>
                     </td>
