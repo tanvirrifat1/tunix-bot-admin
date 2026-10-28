@@ -19,13 +19,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadDir, { recursive: true });
-
     const uploadedFiles: Array<{ url: string; fileName: string; size: number }> = [];
+    const isVercel = Boolean(process.env.VERCEL);
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
     for (const file of allFiles) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         continue;
       }
@@ -33,20 +31,45 @@ export async function POST(request: NextRequest) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const timestamp = Date.now();
-      const randomSuffix = Math.random().toString(36).substring(2, 7);
-      const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const fileName = `${timestamp}-${randomSuffix}-${cleanFileName}`;
+      if (isVercel) {
+        // Vercel serverless has a read-only filesystem.
+        // Return base64 Data URL so images display and persist seamlessly.
+        const mime = file.type || 'image/png';
+        const base64 = buffer.toString('base64');
+        const dataUrl = `data:${mime};base64,${base64}`;
+        uploadedFiles.push({
+          url: dataUrl,
+          fileName: file.name,
+          size: file.size,
+        });
+      } else {
+        // Local environment: save to public/uploads
+        try {
+          await mkdir(uploadDir, { recursive: true });
+          const timestamp = Date.now();
+          const randomSuffix = Math.random().toString(36).substring(2, 7);
+          const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const fileName = `${timestamp}-${randomSuffix}-${cleanFileName}`;
+          const filePath = path.join(uploadDir, fileName);
 
-      const filePath = path.join(uploadDir, fileName);
-      await writeFile(filePath, buffer);
-
-      const publicUrl = `/uploads/${fileName}`;
-      uploadedFiles.push({
-        url: publicUrl,
-        fileName: file.name,
-        size: file.size,
-      });
+          await writeFile(filePath, buffer);
+          uploadedFiles.push({
+            url: `/uploads/${fileName}`,
+            fileName: file.name,
+            size: file.size,
+          });
+        } catch {
+          // If filesystem write fails, fallback to base64 Data URL
+          const mime = file.type || 'image/png';
+          const base64 = buffer.toString('base64');
+          const dataUrl = `data:${mime};base64,${base64}`;
+          uploadedFiles.push({
+            url: dataUrl,
+            fileName: file.name,
+            size: file.size,
+          });
+        }
+      }
     }
 
     if (uploadedFiles.length === 0) {
