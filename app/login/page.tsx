@@ -19,21 +19,21 @@ import {
 } from 'lucide-react';
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated, isMounted } = useAuth();
   const router = useRouter();
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin@tunix.bot');
+  const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loginSuccess, setLoginSuccess] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (isMounted && isAuthenticated) {
       router.replace('/');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isMounted, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +46,7 @@ export default function LoginPage() {
         setLoginSuccess(true);
         setTimeout(() => {
           router.replace('/');
-        }, 600);
+        }, 500);
       } else {
         setErrorMessage(result.error || 'Authentication failed. Please verify credentials.');
       }
@@ -62,17 +62,6 @@ export default function LoginPage() {
     setPassword('admin123');
     setErrorMessage(null);
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#080c14] flex flex-col items-center justify-center text-slate-300">
-        <Loader2 className="w-10 h-10 text-cyan-400 animate-spin mb-4" />
-        <span className="text-xs font-mono tracking-widest text-cyan-400/80 uppercase">
-          Initializing Security Systems...
-        </span>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#080c14] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">

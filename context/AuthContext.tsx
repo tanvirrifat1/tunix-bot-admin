@@ -14,7 +14,7 @@ export interface AdminUser {
 interface AuthContextType {
   user: AdminUser | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  isMounted: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
@@ -25,19 +25,19 @@ const AUTH_STORAGE_KEY = 'tunix_admin_auth_user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
 
+  // Read auth from localStorage on mount
   useEffect(() => {
+    setIsMounted(true);
     try {
       const stored = localStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
         setUser(JSON.parse(stored));
       }
     } catch (e) {
-      console.error('Failed to parse auth from localStorage:', e);
-    } finally {
-      setIsLoading(false);
+      console.warn('Failed to parse auth from localStorage:', e);
     }
   }, []);
 
@@ -79,7 +79,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       setUser(adminData);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminData));
+      try {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminData));
+      } catch (e) {
+        console.warn('Failed to save auth to localStorage:', e);
+      }
       return { success: true };
     }
 
@@ -91,7 +95,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    try {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    } catch (e) {}
     router.replace('/login');
   };
 
@@ -100,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         isAuthenticated: Boolean(user),
-        isLoading,
+        isMounted,
         login,
         logout,
       }}

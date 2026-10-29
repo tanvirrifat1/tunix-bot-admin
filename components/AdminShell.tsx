@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ToastContainer from '@/components/Toast';
 import ProductModal from '@/components/ProductModal';
 import NewOrderModal from '@/components/NewOrderModal';
-import { Loader2, ShieldAlert } from 'lucide-react';
+import LoginPage from '@/app/login/page';
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
@@ -21,13 +20,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   const isLoginPage = pathname === '/login';
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated && !isLoginPage) {
-      router.replace('/login');
-    }
-  }, [isLoading, isAuthenticated, isLoginPage, router]);
-
-  // If on login page, render clean full-screen view
+  // If on /login page, directly render children (LoginPage)
   if (isLoginPage) {
     return (
       <>
@@ -37,29 +30,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     );
   }
 
-  // Loading state while checking authentication credentials
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#080c14] flex flex-col items-center justify-center text-slate-300">
-        <Loader2 className="w-10 h-10 text-cyan-400 animate-spin mb-4" />
-        <span className="text-xs font-mono tracking-widest text-cyan-400/80 uppercase">
-          Verifying Security Clearance...
-        </span>
-      </div>
-    );
-  }
-
-  // If not authenticated and not on login page yet, show security shield while redirecting
+  // If user is not authenticated, show LoginPage immediately!
+  // Prevents infinite redirects, blank screens, and stuck spinners.
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#080c14] flex flex-col items-center justify-center text-slate-300 space-y-3">
-        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-          <ShieldAlert className="w-6 h-6" />
-        </div>
-        <span className="text-xs font-mono tracking-wider text-amber-300 uppercase">
-          Authentication Required • Redirecting to Gateway...
-        </span>
-      </div>
+      <>
+        <LoginPage />
+        <ToastContainer />
+      </>
     );
   }
 
