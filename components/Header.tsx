@@ -10,8 +10,10 @@ import {
   PackagePlus,
   ShieldCheck,
   CheckCircle,
+  LogOut,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -25,6 +27,7 @@ export default function Header({
   onOpenNewProduct,
 }: HeaderProps) {
   const { kpiStats, orders } = useAdmin();
+  const { user, logout } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
 
   const pendingOrders = orders.filter((o) => o.status === 'Pending Confirmation').slice(0, 4);
@@ -125,21 +128,30 @@ export default function Header({
           )}
         </div>
 
-        {/* Admin Profile Chip */}
-        <div className="flex items-center gap-2.5 pl-2 border-l border-slate-800/80">
+        {/* Admin Profile Chip & Sign Out */}
+        <div className="flex items-center gap-2 sm:gap-2.5 pl-2 border-l border-slate-800/80">
           <div className="relative">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-md">
-              RK
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-md uppercase">
+              {user?.avatarLetter || 'RK'}
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-950" />
           </div>
           <div className="hidden md:block text-left">
             <div className="text-xs font-bold text-slate-200 flex items-center gap-1">
-              Rifat Khan
+              {user?.name || 'Rifat Khan'}
               <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 inline" />
             </div>
-            <p className="text-[10px] text-slate-400">Super Admin</p>
+            <p className="text-[10px] text-slate-400">{user?.role || 'Super Admin'}</p>
           </div>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/30 transition-all cursor-pointer ml-1"
+            title="Sign Out of Mission Control"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>

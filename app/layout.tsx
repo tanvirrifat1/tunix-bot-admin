@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 import { AdminProvider } from "@/context/AdminContext";
 import AdminShell from "@/components/AdminShell";
 
@@ -16,9 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="antialiased bg-[#080c14] text-slate-100">
-        <AdminProvider>
-          <AdminShell>{children}</AdminShell>
-        </AdminProvider>
+        <AuthProvider>
+          <AdminProvider>
+            <AdminShell>{children}</AdminShell>
+          </AdminProvider>
+        </AuthProvider>
       </body>
     </html>
   );

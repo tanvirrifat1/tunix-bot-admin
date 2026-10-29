@@ -15,8 +15,10 @@ import {
   Bot,
   CircleDot,
   Radio,
+  LogOut,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -26,6 +28,7 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
   const { kpiStats } = useAdmin();
+  const { logout } = useAuth();
 
   const navItems = [
     {
@@ -187,6 +190,18 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             </div>
             <span className="text-[10px] text-slate-400 font-mono">:3000</span>
           </a>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="w-full mt-2 flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-rose-400/90 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-2">
+              <LogOut className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              <span>Lock & Sign Out</span>
+            </div>
+            <span className="text-[10px] text-rose-400 font-mono">Exit</span>
+          </button>
 
           <div className="mt-3 flex items-center justify-between px-1">
             <span className="text-[11px] text-slate-400">Tunix-Bot Core v2.4</span>
