@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useAdmin } from '@/context/AdminContext';
 import { Product } from '@/lib/types';
 import ProductModal from '@/components/ProductModal';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import {
   Package,
   Plus,
@@ -28,6 +29,7 @@ export default function ProductsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   // Filter products
   const filteredProducts = products.filter((p) => {
@@ -57,10 +59,8 @@ export default function ProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete robot "${name}"? This cannot be undone.`)) {
-      deleteProduct(id);
-    }
+  const handleRequestDelete = (product: Product) => {
+    setProductToDelete(product);
   };
 
   return (
@@ -232,7 +232,7 @@ export default function ProductsPage() {
                   </button>
 
                   <button
-                    onClick={() => handleDelete(product.id, product.name)}
+                    onClick={() => handleRequestDelete(product)}
                     className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-colors cursor-pointer"
                     title="Delete product"
                   >
@@ -253,6 +253,22 @@ export default function ProductsPage() {
           setProductToEdit(null);
         }}
         productToEdit={productToEdit}
+      />
+
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={Boolean(productToDelete)}
+        onClose={() => setProductToDelete(null)}
+        onConfirm={() => {
+          if (productToDelete) {
+            deleteProduct(productToDelete.id);
+            setProductToDelete(null);
+          }
+        }}
+        itemName={productToDelete?.name}
+        itemImage={productToDelete?.image}
+        itemCategory={productToDelete?.category}
+        itemPrice={productToDelete?.price}
       />
     </div>
   );
